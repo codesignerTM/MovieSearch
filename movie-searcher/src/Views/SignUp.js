@@ -7,6 +7,8 @@ import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
 import { withStyles } from "@material-ui/core/styles";
+import * as actions from "../actions/auth.actions";
+import { Redirect } from "react-router-dom";
 
 const styles = theme => ({
   paper: {
@@ -25,24 +27,111 @@ const styles = theme => ({
   },
   submit: {
     margin: theme.spacing(3, 0, 2)
+  },
+  warning: {
+    color: "red",
+    paddingLeft: "10px"
   }
 });
 
 class SignUp extends Component {
   state = {
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: ""
+    form: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: ""
+    },
+    emailWarning: false,
+    passwordWarning: false,
+    firstNameWarning: false,
+    lastNameWarning: false,
+    redirectToMain: false
   };
 
-  signUp(e) {
-    e.preventDefault();
-    console.log("clicked");
-  }
+  validation = () => {
+    let form = this.state.form;
+    if (form.email.length === 0) {
+      this.setState({
+        emailWarning: true
+      });
+    } else if (form.password.length === 0) {
+      return this.setState({
+        emailWarning: false,
+        passwordWarning: true
+      });
+    } else if (form.firstName.length === 0) {
+      return this.setState({
+        emailWarning: false,
+        passwordWarning: false,
+        firstNameWarning: true
+      });
+    } else if (form.lastName.length === 0) {
+      return this.setState({
+        emailWarning: false,
+        passwordWarning: false,
+        firstNameWarning: false,
+        lastNameWarning: true
+      });
+    } else {
+      return true;
+    }
+  };
+
+  signUp = () => {
+    let form = this.state.form;
+    let isValid = this.validation();
+    if (!isValid) {
+      return;
+    }
+    let signUp = true;
+    actions
+      .Authenticate(
+        form.email,
+        form.password,
+        form.firstName + form.lastName,
+        signUp
+      )
+      .then(response => {
+        const expirationDate = new Date(
+          new Date().getTime() + response.data.expiresIn * 1000
+        );
+        localStorage.setItem("token", response.data.idToken);
+        localStorage.setItem("expirationDate", expirationDate);
+        localStorage.setItem("userId", response.data.localId);
+        localStorage.setItem("email", form.email);
+        this.setState({
+          redirectToMain: true
+        });
+      })
+      .catch(error => {
+        console.log("Error while authenticate!", error);
+        if (error.code === 400) {
+          alert("Email exists!");
+        }
+        alert("Something faild, try again later!");
+      });
+  };
+
+  handleChange = input => e => {
+    let targetValue = e.target.value;
+    this.setState({
+      form: {
+        ...this.state.form,
+        [input]: targetValue
+      }
+    });
+  };
 
   render() {
     const { classes } = this.props;
+    const {
+      redirectToMain,
+      emailWarning,
+      passwordWarning,
+      firstNameWarning,
+      lastNameWarning
+    } = this.state;
     return (
       <Container component="main" maxWidth="xs">
         <CssBaseline />
@@ -52,26 +141,39 @@ class SignUp extends Component {
           </Typography>
           <form className={classes.form} noValidate>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <TextField
-                  name="firstName"
                   variant="outlined"
                   required
                   fullWidth
                   id="firstName"
                   label="First Name"
                   autoFocus
+                  onChange={this.handleChange("firstName")}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              {firstNameWarning === true ? (
+                <span className={classes.warning}>
+                  Please type your first name!
+                </span>
+              ) : null}
+              <Grid item xs={12}>
                 <TextField
+                  name="lastName"
                   variant="outlined"
                   required
                   fullWidth
                   id="lastName"
                   label="Last Name"
-                  name="lastName"
+                  autoFocus
+                  value={this.state.form.lastName}
+                  onChange={this.handleChange("lastName")}
                 />
+                {lastNameWarning === true ? (
+                  <span className={classes.warning}>
+                    Please type your second name!
+                  </span>
+                ) : null}
               </Grid>
               <Grid item xs={12}>
                 <TextField
@@ -81,7 +183,13 @@ class SignUp extends Component {
                   id="email"
                   label="Email Address"
                   name="email"
+                  onChange={this.handleChange("email")}
                 />
+                {emailWarning === true ? (
+                  <span className={classes.warning}>
+                    Please type your email address!
+                  </span>
+                ) : null}
               </Grid>
               <Grid item xs={12}>
                 <TextField
@@ -92,11 +200,17 @@ class SignUp extends Component {
                   label="Password"
                   type="password"
                   id="password"
+                  onChange={this.handleChange("password")}
                 />
+                {passwordWarning === true ? (
+                  <span className={classes.warning}>
+                    Please type a strong password! It should contain uppercase
+                    letter, number and symbol!
+                  </span>
+                ) : null}
               </Grid>
             </Grid>
             <Button
-              type="submit"
               fullWidth
               variant="contained"
               color="primary"
@@ -112,6 +226,7 @@ class SignUp extends Component {
             </Grid>
           </form>
         </div>
+        {redirectToMain === true ? <Redirect to="/main" /> : null}
       </Container>
     );
   }
