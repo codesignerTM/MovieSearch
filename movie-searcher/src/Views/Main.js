@@ -8,6 +8,7 @@ import { withStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import Input from "@material-ui/core/Input";
 import Link from "@material-ui/core/Link";
+import { Redirect } from "react-router-dom";
 
 const styles = theme => ({
   toolBar: {
@@ -27,10 +28,23 @@ const styles = theme => ({
 });
 
 class Main extends Component {
-  state = {};
+  state = {
+    logout: false
+  };
+
+  signOut = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("expirationDate");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("email");
+    this.setState({
+      logout: true
+    });
+  };
 
   render() {
     const { classes } = this.props;
+    const { logout } = this.state;
     return (
       <React.Fragment>
         <AppBar position="relative">
@@ -39,9 +53,9 @@ class Main extends Component {
               Movie Search
             </Typography>
             <Typography variant="h6" color="inherit" noWrap>
-              <Link className={classes.logout} href="/logout">
-                {" Logout"}
-              </Link>
+              <Button className={classes.logout} onClick={this.signOut}>
+                Logout
+              </Button>
             </Typography>
           </Toolbar>
         </AppBar>
@@ -82,6 +96,7 @@ class Main extends Component {
             </Container>
           </div>
         </main>
+        {logout === true ? <Redirect to="/logout" /> : null}
       </React.Fragment>
     );
   }
