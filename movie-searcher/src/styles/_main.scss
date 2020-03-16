@@ -1,0 +1,7 @@
+.App {
+  text-align: left;
+  background-color: red;
+  & .logo {
+    width: 20px;
+  }
+}
