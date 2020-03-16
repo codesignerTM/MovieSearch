@@ -4,6 +4,7 @@ import "./App.scss";
 
 import SignIn from "./Views/SignIn";
 import SignUp from "./Views/SignUp";
+import Logout from "./Views/Logout";
 import Main from "./Views/Main";
 
 class App extends Component {
@@ -11,12 +12,24 @@ class App extends Component {
     isSignedIn: false
   };
 
+  componentDidMount() {
+    let email = localStorage.getItem("email");
+    let token = localStorage.getItem("token");
+    let userId = localStorage.getItem("userId");
+
+    if (email && token && userId) {
+      this.setState({
+        isSignedIn: true
+      });
+    }
+  }
+
   render() {
     let routes = (
       <Switch>
         <Route path="/" exact component={SignIn} />
         <Route path="/signup" exact component={SignUp} />
-        <Route path="/main" exact component={Main} />
+        <Route path="/logout" exact component={Logout} />
         <Redirect to="/" />
       </Switch>
     );
@@ -26,6 +39,7 @@ class App extends Component {
           <Route path="/" exact component={SignIn} />
           <Route path="/signup" exact component={SignUp} />
           <Route path="/main" exact component={Main} />
+          <Route path="/logout" exact component={Logout} />
           <Redirect to="/" />
         </Switch>
       );
