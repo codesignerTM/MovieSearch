@@ -6,9 +6,9 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
-import Input from "@material-ui/core/Input";
-import Link from "@material-ui/core/Link";
+import TextField from "@material-ui/core/TextField";
 import { Redirect } from "react-router-dom";
+import * as actions from "../actions/imdb.actions";
 
 const styles = theme => ({
   toolBar: {
@@ -29,7 +29,8 @@ const styles = theme => ({
 
 class Main extends Component {
   state = {
-    logout: false
+    logout: false,
+    searchTerm: ""
   };
 
   signOut = () => {
@@ -42,9 +43,30 @@ class Main extends Component {
     });
   };
 
+  handleChange = input => e => {
+    let targetValue = e.target.value;
+    this.setState({
+      [input]: targetValue
+    });
+  };
+
+  search = () => {
+    let searchTerm = this.state.searchTerm;
+    console.log("searchTerm", searchTerm);
+    actions
+      .imdbSearch(searchTerm)
+      .then(response => {
+        console.log("response", response);
+      })
+      .catch(error => {
+        console.log("Error!", error);
+      });
+  };
+
   render() {
     const { classes } = this.props;
     const { logout } = this.state;
+    console.log("state", this.state);
     return (
       <React.Fragment>
         <AppBar position="relative">
@@ -83,11 +105,22 @@ class Main extends Component {
               </Typography>
               <div className={classes.searchButton}>
                 <Grid container spacing={2} justify="center">
+                  <TextField
+                    variant="outlined"
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="searchTerm"
+                    label="Search Term"
+                    autoFocus
+                    onChange={this.handleChange("searchTerm")}
+                  />
                   <Grid item>
-                    <Input />
-                  </Grid>
-                  <Grid item>
-                    <Button variant="contained" color="primary">
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={this.search}
+                    >
                       Search
                     </Button>
                   </Grid>
