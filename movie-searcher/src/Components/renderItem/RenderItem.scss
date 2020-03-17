@@ -1,0 +1,12 @@
+.render-item {
+  width: 300px;
+  margin: 3px auto;
+  padding: 5px;
+  background-color: #ccc;
+  color: #fff;
+  border-radius: 3px;
+}
+
+.render-item:hover {
+  background-color: rgb(174, 181, 238);
+}

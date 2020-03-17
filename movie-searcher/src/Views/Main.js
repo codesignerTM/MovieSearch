@@ -9,6 +9,12 @@ import Container from "@material-ui/core/Container";
 import TextField from "@material-ui/core/TextField";
 import { Redirect } from "react-router-dom";
 import * as actions from "../actions/imdb.actions";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import RenderItem from "../Components/renderItem/RenderItem";
 
 const styles = theme => ({
   toolBar: {
@@ -24,13 +30,26 @@ const styles = theme => ({
   },
   logout: {
     color: "#fff"
+  },
+  spinnerCont: {
+    display: "flex",
+    justifyContent: "center",
+    margin: " 20px"
+  },
+  ul: {
+    listStyleType: "none"
   }
 });
 
 class Main extends Component {
   state = {
     logout: false,
-    searchTerm: ""
+    searchTerm: "",
+    count: "",
+    foundMovies: [],
+    dialogTitle: "",
+    loading: false,
+    openDialog: false
   };
 
   signOut = () => {
@@ -52,21 +71,79 @@ class Main extends Component {
 
   search = () => {
     let searchTerm = this.state.searchTerm;
-    console.log("searchTerm", searchTerm);
+    this.setState({
+      loading: true
+    });
     actions
       .imdbSearch(searchTerm)
       .then(response => {
-        console.log("response", response);
+        this.setState({
+          loading: false,
+          count: response.data.totalResults,
+          foundMovies: response.data.Search
+        });
+        this.renderList();
       })
       .catch(error => {
         console.log("Error!", error);
       });
   };
 
+  renderList() {
+    this.setState({
+      openDialog: true
+    });
+  }
+
+  handleClose = () => {
+    this.setState({
+      openDialog: false
+    });
+  };
+
   render() {
     const { classes } = this.props;
-    const { logout } = this.state;
-    console.log("state", this.state);
+    const {
+      logout,
+      foundMovies,
+      loading,
+      openDialog,
+      totalResults
+    } = this.state;
+    let movieList;
+
+    if (openDialog) {
+      movieList = (
+        <Dialog
+          aria-labelledby="responsive-dialog-title"
+          open={openDialog}
+          onClose={this.handleClose}
+        >
+          <DialogTitle id="responsive-dialog-title">
+            Search Result: {totalResults}
+          </DialogTitle>
+          <DialogContent className={classes.ul}>
+            {foundMovies.map(movie => {
+              return (
+                <RenderItem
+                  key={movie.imdbID}
+                  movieName={movie.Title}
+                  year={movie.Year}
+                  type={movie.Type}
+                  //onClick={this.chooseMovie.bind(this, movie)}
+                />
+              );
+            })}
+          </DialogContent>
+          <DialogActions>
+            <Button color="primary" autoFocus onClick={this.handleClose}>
+              Bezárás
+            </Button>
+          </DialogActions>
+        </Dialog>
+      );
+    }
+
     return (
       <React.Fragment>
         <AppBar position="relative">
@@ -115,7 +192,11 @@ class Main extends Component {
                     autoFocus
                     onChange={this.handleChange("searchTerm")}
                   />
+
                   <Grid item>
+                    <div className={classes.spinnerCont}>
+                      {loading ? <CircularProgress color="secodary" /> : null}
+                    </div>
                     <Button
                       variant="contained"
                       color="primary"
@@ -130,6 +211,7 @@ class Main extends Component {
           </div>
         </main>
         {logout === true ? <Redirect to="/logout" /> : null}
+        {movieList}
       </React.Fragment>
     );
   }
