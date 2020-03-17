@@ -9,6 +9,7 @@ import Container from "@material-ui/core/Container";
 import { withStyles } from "@material-ui/core/styles";
 import * as actions from "../actions/auth.actions";
 import { Redirect } from "react-router-dom";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 const styles = theme => ({
   paper: {
@@ -31,6 +32,11 @@ const styles = theme => ({
   warning: {
     color: "red",
     paddingLeft: "10px"
+  },
+  spinnerCont: {
+    display: "flex",
+    justifyContent: "center",
+    margin: " 20px"
   }
 });
 
@@ -46,7 +52,8 @@ class SignUp extends Component {
     passwordWarning: false,
     firstNameWarning: false,
     lastNameWarning: false,
-    redirectToMain: false
+    redirectToMain: false,
+    loading: false
   };
 
   validation = () => {
@@ -84,6 +91,9 @@ class SignUp extends Component {
     if (!isValid) {
       return;
     }
+    this.setState({
+      loading: true
+    });
     let signUp = true;
     actions
       .Authenticate(
@@ -101,7 +111,8 @@ class SignUp extends Component {
         localStorage.setItem("userId", response.data.localId);
         localStorage.setItem("email", form.email);
         this.setState({
-          redirectToMain: true
+          redirectToMain: true,
+          loading: false
         });
       })
       .catch(error => {
@@ -130,7 +141,8 @@ class SignUp extends Component {
       emailWarning,
       passwordWarning,
       firstNameWarning,
-      lastNameWarning
+      lastNameWarning,
+      loading
     } = this.state;
     return (
       <Container component="main" maxWidth="xs">
@@ -210,6 +222,9 @@ class SignUp extends Component {
                 ) : null}
               </Grid>
             </Grid>
+            <div className={classes.spinnerCont}>
+              {loading ? <CircularProgress color="secodary" /> : null}
+            </div>
             <Button
               fullWidth
               variant="contained"

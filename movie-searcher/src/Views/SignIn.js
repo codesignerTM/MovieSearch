@@ -7,6 +7,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Link from "@material-ui/core/Link";
 import Paper from "@material-ui/core/Paper";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
@@ -44,6 +45,11 @@ const styles = theme => ({
   },
   submit: {
     margin: theme.spacing(3, 0, 2)
+  },
+  spinnerCont: {
+    display: "flex",
+    justifyContent: "center",
+    margin: " 20px"
   }
 });
 
@@ -55,7 +61,8 @@ class SignIn extends Component {
     },
     emailWarning: false,
     passwordWarning: false,
-    redirectToMain: false
+    isSignedIn: false,
+    loading: false
   };
 
   signIn = () => {
@@ -88,7 +95,8 @@ class SignIn extends Component {
           localStorage.setItem("userId", response.data.localId);
           localStorage.setItem("email", form.email);
           this.setState({
-            redirectToMain: true
+            isSignedIn: true,
+            loading: false
           });
         })
         .catch(error => {
@@ -110,8 +118,7 @@ class SignIn extends Component {
 
   render() {
     const { classes } = this.props;
-
-    const { redirectToMain, emailWarning, passwordWarning } = this.state;
+    const { isSignedIn, emailWarning, passwordWarning, loading } = this.state;
     return (
       <Grid container component="main" className={classes.root}>
         <CssBaseline />
@@ -122,6 +129,7 @@ class SignIn extends Component {
             <Typography component="h1" variant="h5">
               Sign in
             </Typography>
+            {isSignedIn ? <Redirect to="/main" /> : null}
             <form className={classes.form} noValidate>
               <TextField
                 variant="outlined"
@@ -159,6 +167,9 @@ class SignIn extends Component {
                 control={<Checkbox value="remember" color="primary" />}
                 label="Remember me"
               />
+              <div className={classes.spinnerCont}>
+                {loading ? <CircularProgress color="secodary" /> : null}
+              </div>
               <Button
                 fullWidth
                 variant="contained"
@@ -176,7 +187,6 @@ class SignIn extends Component {
             </form>
           </div>
         </Grid>
-        {redirectToMain === true ? <Redirect to="/main" /> : null}
       </Grid>
     );
   }
