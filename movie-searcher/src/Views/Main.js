@@ -49,7 +49,9 @@ class Main extends Component {
     foundMovies: [],
     dialogTitle: "",
     loading: false,
-    openDialog: false
+    openDialog: false,
+    checkMovie: false,
+    selectedMovie: {}
   };
 
   signOut = () => {
@@ -89,6 +91,13 @@ class Main extends Component {
       });
   };
 
+  chooseMovie = movie => {
+    this.setState({
+      selectedMovie: movie,
+      checkMovie: true
+    });
+  };
+
   renderList() {
     this.setState({
       openDialog: true
@@ -108,7 +117,9 @@ class Main extends Component {
       foundMovies,
       loading,
       openDialog,
-      totalResults
+      totalResults,
+      checkMovie,
+      selectedMovie
     } = this.state;
     let movieList;
 
@@ -130,7 +141,7 @@ class Main extends Component {
                   movieName={movie.Title}
                   year={movie.Year}
                   type={movie.Type}
-                  //onClick={this.chooseMovie.bind(this, movie)}
+                  onClick={this.chooseMovie.bind(this, movie)}
                 />
               );
             })}
@@ -160,6 +171,14 @@ class Main extends Component {
         </AppBar>
         <main>
           <div className={classes.content}>
+            {checkMovie === true ? (
+              <Redirect
+                to={{
+                  pathname: "/moviedetail",
+                  state: { selectedMovie: selectedMovie }
+                }}
+              />
+            ) : null}
             <Container maxWidth="sm">
               <Typography
                 component="h1"

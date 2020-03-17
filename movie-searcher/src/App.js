@@ -6,6 +6,7 @@ import SignIn from "./Views/SignIn";
 import SignUp from "./Views/SignUp";
 import Logout from "./Views/Logout";
 import Main from "./Views/Main";
+import MovieDetail from "./Views/MovieDetail";
 
 class App extends Component {
   state = {
@@ -39,6 +40,7 @@ class App extends Component {
           <Route path="/" exact component={SignIn} />
           <Route path="/signup" exact component={SignUp} />
           <Route path="/main" exact component={Main} />
+          <Route path="/moviedetail" exact component={MovieDetail} />
           <Route path="/logout" exact component={Logout} />
           <Redirect to="/" />
         </Switch>
