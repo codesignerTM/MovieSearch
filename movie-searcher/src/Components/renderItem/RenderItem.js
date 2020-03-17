@@ -5,7 +5,11 @@ const RenderItem = props => {
   return (
     <>
       <li>
-        <button className="render-item" onClick={props.onClick}>
+        <button
+          className="render-item"
+          onClick={props.onClick}
+          data-testid="render-item-button"
+        >
           {props.movieName}
         </button>
       </li>
