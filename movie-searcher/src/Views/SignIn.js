@@ -168,7 +168,7 @@ class SignIn extends Component {
                 label="Remember me"
               />
               <div className={classes.spinnerCont}>
-                {loading ? <CircularProgress color="secodary" /> : null}
+                {loading ? <CircularProgress /> : null}
               </div>
               <Button
                 fullWidth

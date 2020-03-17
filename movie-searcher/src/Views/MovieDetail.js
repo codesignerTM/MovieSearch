@@ -20,7 +20,6 @@ const styles = theme => ({
     padding: theme.spacing(8, 0, 6)
   },
   movieContent: {
-    width: "400px",
     height: "70vh",
     margin: "auto"
   },
@@ -33,13 +32,18 @@ const styles = theme => ({
     margin: " 20px"
   },
   posterContainer: {
-    maxWidth: "250px"
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center"
   },
   btnCont: {
     width: "100%",
     display: "flex",
     aligItems: "center",
     justifyContent: "center"
+  },
+  btn: {
+    margin: "5px"
   }
 });
 
@@ -52,7 +56,6 @@ class MovieDetail extends Component {
 
   componentDidMount() {
     let selectedMovie = this.props.location.state.selectedMovie;
-
     this.setState({
       selectedMovie: selectedMovie
     });
@@ -68,29 +71,55 @@ class MovieDetail extends Component {
     });
   };
 
-  /* searchOnWiki = () => {
-    let searchTerm = this.state.searchTerm;
+  searchOnWiki = () => {
+    let { selectedMovie } = this.state;
     this.setState({
       loading: true
     });
     actions
-      .wikiSearch(searchTerm)
+      .wikiSnippetSearch(selectedMovie.Title)
       .then(response => {
         this.setState({
           loading: false,
-          foundMovies: response.data.Search
+          snippet: response.data.query.search[0].snippet
         });
-        //this.renderList();
+        this.getWikiUrl();
       })
       .catch(error => {
         console.log("Error!", error);
       });
-  }; */
+  };
+
+  getWikiUrl = () => {
+    let { selectedMovie } = this.state;
+    this.setState({
+      loading: true
+    });
+    actions
+      .wikiPageSearch(selectedMovie.Title)
+      .then(response => {
+        console.log("wiki", response);
+        this.setState({
+          loading: false,
+          wikiUrl: response.data[3]
+        });
+      })
+      .catch(error => {
+        console.log("Error!", error);
+      });
+  };
 
   render() {
     const { classes } = this.props;
-    const { logout, selectedMovie, loading } = this.state;
-    console.log("state", this.state);
+    const { logout, selectedMovie, loading, snippet, wikiUrl } = this.state;
+    let gotSnippet;
+    if (snippet) {
+      gotSnippet = (
+        <Typography variant="h6" align="center" color="textSecondary" paragraph>
+          Wiki snippet: {snippet}
+        </Typography>
+      );
+    }
     return (
       <React.Fragment>
         <AppBar position="relative">
@@ -129,7 +158,7 @@ class MovieDetail extends Component {
               </Typography>
               <div className={classes.movieContent}>
                 <Grid container spacing={2} justify="center">
-                  <Grid item>
+                  <Grid>
                     <div className={classes.spinnerCont}>
                       {loading ? <CircularProgress color="secodary" /> : null}
                     </div>
@@ -165,6 +194,7 @@ class MovieDetail extends Component {
                     >
                       Type: {selectedMovie.Type}
                     </Typography>
+                    {gotSnippet}
                     <div className={classes.posterContainer}>
                       <img src={selectedMovie.Poster} alt="Movie poster" />
                     </div>
@@ -173,8 +203,28 @@ class MovieDetail extends Component {
                         variant="contained"
                         color="primary"
                         onClick={this.searchOnWiki}
+                        className={classes.btn}
                       >
-                        Find on Wikipedia
+                        Find Summary on Wikipedia
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={this.navigateToWiki}
+                        className={classes.btn}
+                        disabled={wikiUrl ? false : true}
+                      >
+                        {wikiUrl ? (
+                          <a
+                            href={wikiUrl[0]}
+                            target="_blank"
+                            style={{ color: "#fff", textDecoration: "none" }}
+                          >
+                            Check on Wikipedia
+                          </a>
+                        ) : (
+                          "Check on Wikipedia"
+                        )}
                       </Button>
                     </div>
                   </Grid>

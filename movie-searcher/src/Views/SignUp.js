@@ -223,7 +223,7 @@ class SignUp extends Component {
               </Grid>
             </Grid>
             <div className={classes.spinnerCont}>
-              {loading ? <CircularProgress color="secodary" /> : null}
+              {loading ? <CircularProgress /> : null}
             </div>
             <Button
               fullWidth
